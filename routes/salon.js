@@ -110,6 +110,7 @@ router.put('/update', authMiddleware, async (req, res) => {
         pincode,
         openingTime,
         closingTime,
+        fast2sms_api_key,
     } = req.body;
 
     await supabase
@@ -121,6 +122,7 @@ router.put('/update', authMiddleware, async (req, res) => {
             pincode,
             opening_time: openingTime,
             closing_time: closingTime,
+            fast2sms_api_key: fast2sms_api_key
         })
         .eq('user_id', userId);
 
