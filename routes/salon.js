@@ -1,11 +1,11 @@
 import express from 'express';
 import { supabase } from '../config/supabase.js';
-import { authMiddleware } from '../middleware/authMiddleware.js';
+import { authMiddleware, userAuthMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 // GET SALON DETAILS
-router.get('/me', authMiddleware, async (req, res) => {
+router.get('/me', userAuthMiddleware, async (req, res) => {
     const userId = req.user.id;
 
     const { data: salon } = await supabase
@@ -28,7 +28,7 @@ router.get('/me', authMiddleware, async (req, res) => {
 });
 
 // CREATE SALON DETAILS
-router.post('/create', authMiddleware, async (req, res) => {
+router.post('/create', userAuthMiddleware, async (req, res) => {
     const userId = req.user.id;
 
     const {
@@ -110,6 +110,7 @@ router.put('/update', authMiddleware, async (req, res) => {
         pincode,
         openingTime,
         closingTime,
+        fast2sms_api_key,
     } = req.body;
 
     await supabase
@@ -121,6 +122,7 @@ router.put('/update', authMiddleware, async (req, res) => {
             pincode,
             opening_time: openingTime,
             closing_time: closingTime,
+            fast2sms_api_key: fast2sms_api_key
         })
         .eq('user_id', userId);
 

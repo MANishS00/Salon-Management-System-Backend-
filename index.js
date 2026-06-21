@@ -7,6 +7,8 @@ import salonRoutes from './routes/salon.js';
 import barberRoutes from './routes/barber.js';
 import customersRoutes from './routes/customer.js';
 import customerBulkRoutes from './routes/customerBulk.js';
+import customerSmsRoutes from './routes/customerSms.js';
+import qrRoutes from "./routes/qr.js";
 
 
 console.log('SUPABASE_URL =>', process.env.SUPABASE_URL);
@@ -21,7 +23,10 @@ app.use('/api/salon', salonRoutes);
 app.use('/api/barber', barberRoutes);
 app.use('/api/customers', customersRoutes);
 app.use('/api/customerBulkRoutes', customerBulkRoutes);
+app.use('/api/customerSmsRoutes', customerSmsRoutes);
+app.use("/api/qr", qrRoutes);
 
-app.listen(5000, () => {
-  console.log('Server running on port 5000');
+const PORT = process.env.PORT || 5001;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

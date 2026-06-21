@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Salon Details</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .card {
+            width: 90%;
+            max-width: 500px;
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .item {
+            margin-bottom: 15px;
+        }
+
+        .label {
+            font-weight: bold;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: black;
+            color: white;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="card">
+
+        <h1 id="salonName">Loading...</h1>
+
+        <div class="item">
+            <div class="label">Phone</div>
+            <div id="phone"></div>
+        </div>
+
+        <div class="item">
+            <div class="label">Email</div>
+            <div id="email"></div>
+        </div>
+
+        <div class="item">
+            <div class="label">Address</div>
+            <div id="address"></div>
+        </div>
+
+        <button class="btn">
+            Booking Coming Soon
+        </button>
+
+    </div>
+
+    <script>
+        const slug = window.location.pathname.split("/").pop();
+
+        fetch(`/api/qr/public-salon/${slug}`)
+            .then(res => res.json())
+            .then(data => {
+
+                document.getElementById("salonName").innerText =
+                    data.salon_name || "-";
+
+                document.getElementById("phone").innerText =
+                    data.phone || "-";
+
+                document.getElementById("email").innerText =
+                    data.email || "-";
+
+                document.getElementById("address").innerText =
+                    data.address || "-";
+            });
+    </script>
+
+</body>
+
+</html>
