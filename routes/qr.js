@@ -8,7 +8,7 @@ import { authMiddleware } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 /**
- * Generate QR
+ * Generate QR Code
  */
 router.post("/generate-qr", authMiddleware, async (req, res) => {
     try {
