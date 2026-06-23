@@ -1,6 +1,7 @@
 import express from "express";
 import QRCode from "qrcode";
 import { nanoid } from "nanoid";
+import path from "path";
 
 import { supabase } from "../config/supabase.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
@@ -92,122 +93,52 @@ router.post("/generate-qr", authMiddleware, async (req, res) => {
  * URL:
  * http://localhost:5000/salon/royal-salon-abc12
  */
+/**
+ * Serve public salon page from public folder
+ */
 router.get("/salon/:slug", async (req, res) => {
     try {
         const { slug } = req.params;
 
         const { data: salon, error } = await supabase
             .from("salon_details")
-            .select(
-                `
-        salon_name,
-        phone,
-        email,
-        address
-      `
-            )
+            .select("id")
             .eq("public_slug", slug)
             .single();
 
         if (error || !salon) {
             return res.status(404).send(`
-        <h1>Salon Not Found</h1>
-      `);
+                <h1 style="text-align:center; font-family:sans-serif; margin-top:50px;">Salon Not Found</h1>
+            `);
         }
 
-        res.send(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>${salon.salon_name}</title>
+        res.sendFile(path.resolve("public/salon.html"));
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+    }
+});
 
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+/**
+ * Serve public customer registration page
+ */
+router.get("/salon/:slug/register", async (req, res) => {
+    try {
+        const { slug } = req.params;
 
-        <style>
-          *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-            font-family:Arial,sans-serif;
-          }
+        const { data: salon, error } = await supabase
+            .from("salon_details")
+            .select("id")
+            .eq("public_slug", slug)
+            .single();
 
-          body{
-            background:#f5f5f5;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            min-height:100vh;
-          }
+        if (error || !salon) {
+            return res.status(404).send(`
+                <h1 style="text-align:center; font-family:sans-serif; margin-top:50px;">Salon Not Found</h1>
+            `);
+        }
 
-          .card{
-            width:90%;
-            max-width:500px;
-            background:white;
-            padding:25px;
-            border-radius:16px;
-            box-shadow:0 5px 20px rgba(0,0,0,0.1);
-          }
-
-          h1{
-            text-align:center;
-            margin-bottom:25px;
-          }
-
-          .item{
-            margin-bottom:15px;
-          }
-
-          .label{
-            font-weight:bold;
-            color:#444;
-          }
-
-          .value{
-            margin-top:4px;
-            color:#666;
-          }
-
-          .btn{
-            width:100%;
-            margin-top:20px;
-            padding:12px;
-            border:none;
-            border-radius:10px;
-            background:black;
-            color:white;
-            cursor:pointer;
-          }
-        </style>
-      </head>
-
-      <body>
-        <div class="card">
-
-          <h1>${salon.salon_name}</h1>
-
-          <div class="item">
-            <div class="label">Phone</div>
-            <div class="value">${salon.phone || "-"}</div>
-          </div>
-
-          <div class="item">
-            <div class="label">Email</div>
-            <div class="value">${salon.email || "-"}</div>
-          </div>
-
-          <div class="item">
-            <div class="label">Address</div>
-            <div class="value">${salon.address || "-"}</div>
-          </div>
-
-          <button class="btn">
-            Booking Coming Soon
-          </button>
-
-        </div>
-      </body>
-      </html>
-    `);
+        res.sendFile(path.resolve("public/register-customer.html"));
     } catch (error) {
         console.error(error);
 
@@ -215,57 +146,109 @@ router.get("/salon/:slug", async (req, res) => {
     }
 });
 
-// router.get("/qr", authMiddleware, async (req, res) => {
-//     try {
-//         const { data, error } = await supabase
-//             .from("salon_details")
-//             .select("public_slug, qr_code")
-//             .eq("user_id", req.user.id)
-//             .single();
+/**
+ * Fetch salon details publicly (no auth)
+ */
+router.get("/public-salon/:slug", async (req, res) => {
+    try {
+        const { slug } = req.params;
 
-//         if (error) throw error;
+        const { data, error } = await supabase
+            .from("salon_details")
+            .select(`
+                salon_name,
+                phone,
+                email,
+                address
+            `)
+            .eq("public_slug", slug)
+            .single();
 
-//         return res.json({
-//             success: true,
-//             salon_url: `${process.env.FRONTEND_URL}/salon/${data.public_slug}`,
-//             qr_code: data.qr_code,
-//         });
-//     } catch (error) {
-//         return res.status(500).json({
-//             success: false,
-//             message: error.message,
-//         });
-//     }
-// });
+        if (error || !data) {
+            return res.status(404).json({
+                message: "Salon not found"
+            });
+        }
 
-// router.get("/public-salon/:slug", async (req, res) => {
-//     try {
-//         const { slug } = req.params;
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        });
+    }
+});
 
-//         const { data, error } = await supabase
-//             .from("salon_details")
-//             .select(`
-//                 salon_name,
-//                 phone,
-//                 email,
-//                 address
-//             `)
-//             .eq("public_slug", slug)
-//             .single();
+/**
+ * Add customer details publicly (no auth)
+ */
+router.post("/salon/:slug/add-customer", async (req, res) => {
+    try {
+        const { slug } = req.params;
+        const { first_name, last_name, date_of_birth, mobile_no, gender } = req.body;
 
-//         if (error || !data) {
-//             return res.status(404).json({
-//                 message: "Salon not found"
-//             });
-//         }
+        if (!first_name || !mobile_no) {
+            return res.status(400).json({
+                success: false,
+                message: "First name and mobile number are required"
+            });
+        }
 
-//         res.json(data);
+        // Get salon ID from slug
+        const { data: salon, error: salonError } = await supabase
+            .from("salon_details")
+            .select("id")
+            .eq("public_slug", slug)
+            .single();
 
-//     } catch (error) {
-//         res.status(500).json({
-//             message: error.message
-//         });
-//     }
-// });
+        if (salonError || !salon) {
+            return res.status(404).json({
+                success: false,
+                message: "Salon not found"
+            });
+        }
+
+        // Check if customer already exists for this salon by mobile number
+        const { data: existingCustomer } = await supabase
+            .from("customers")
+            .select("id")
+            .eq("salon_id", salon.id)
+            .eq("mobile_no", mobile_no)
+            .maybeSingle();
+
+        if (existingCustomer) {
+            return res.status(400).json({
+                success: false,
+                message: "Customer with this mobile number is already registered at this salon"
+            });
+        }
+
+        // Insert new customer under this salon
+        const { error: insertError } = await supabase
+            .from("customers")
+            .insert([{
+                salon_id: salon.id,
+                first_name,
+                last_name: last_name || null,
+                date_of_birth: date_of_birth || null,
+                mobile_no,
+                gender: gender || null
+            }]);
+
+        if (insertError) {
+            throw insertError;
+        }
+
+        return res.json({
+            success: true,
+            message: "Customer registered successfully"
+        });
+    } catch (error) {
+        console.error("Error registering customer:", error);
+        return res.status(500).json({
+            success: false,
+            message: error.message || "Failed to register customer"
+        });
+    }
+});
 
 export default router;
