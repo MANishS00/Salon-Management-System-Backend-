@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Appointment</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #121216;
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: auto;
+        }
+
+        .card {
+            background: #1c1c22;
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #999;
+            margin-bottom: 20px;
+        }
+
+        .date-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .date-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background: #2a2a33;
+            color: white;
+        }
+
+        .date-btn.active {
+            background: #d4af37;
+            color: black;
+            font-weight: bold;
+        }
+
+        .slot-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .slot {
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: .2s;
+            font-weight: 600;
+        }
+
+        .available {
+            border: 1px solid #3b82f6;
+            background: rgba(59, 130, 246, .15);
+            color: #93c5fd;
+        }
+
+        .selected {
+            border: 1px solid #22c55e;
+            background: rgba(34, 197, 94, .15);
+            color: #86efac;
+        }
+
+        .unavailable {
+            border: 1px solid #555;
+            background: rgba(255, 255, 255, .05);
+            color: #777;
+            cursor: not-allowed;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid #444;
+            background: #2a2a33;
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: #d4af37;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            opacity: .9;
+        }
+
+        #message {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        @media(max-width:600px) {
+            .slot-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="card">
+
+            <h1 id="salonName">Salon</h1>
+            <p class="subtitle">Book Appointment</p>
+
+            <div class="date-tabs">
+                <button class="date-btn active" id="todayBtn">
+                    Today
+                </button>
+
+                <button class="date-btn" id="tomorrowBtn">
+                    Tomorrow
+                </button>
+            </div>
+
+            <div class="slot-grid" id="slotContainer"></div>
+
+            <input type="text" id="customerName" placeholder="Enter Name">
+
+            <input type="tel" id="customerPhone" placeholder="Enter Mobile Number">
+
+            <input type="text" id="serviceName" placeholder="Service (Optional)">
+
+            <button class="btn" onclick="bookSlot()">
+                Book Appointment
+            </button>
+
+            <div id="message"></div>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        const pathParts = window.location.pathname.split("/");
+
+        const slug = pathParts[pathParts.length - 2];
+
+        let availabilityData = null;
+
+        let selectedSlot = null;
+        let selectedDate = null;
+
+        async function loadAvailability() {
+
+            try {
+
+                const response = await fetch(
+                    `/api/bookings/availability/${slug}`
+                );
+
+                const data = await response.json();
+
+                availabilityData = data;
+
+                document.getElementById("salonName").innerText =
+                    data.salon_name;
+
+                renderToday();
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function renderToday() {
+
+            document.getElementById("todayBtn")
+                .classList.add("active");
+
+            document.getElementById("tomorrowBtn")
+                .classList.remove("active");
+
+            selectedDate = availabilityData.today.date;
+
+            renderSlots(
+                availabilityData.today.slots,
+                availabilityData.today.date
+            );
+        }
+
+        function renderTomorrow() {
+
+            document.getElementById("tomorrowBtn")
+                .classList.add("active");
+
+            document.getElementById("todayBtn")
+                .classList.remove("active");
+
+            selectedDate = availabilityData.tomorrow.date;
+
+            renderSlots(
+                availabilityData.tomorrow.slots,
+                availabilityData.tomorrow.date
+            );
+        }
+
+        function isPastSlot(startTime, date) {
+
+            const now = new Date();
+
+            const slotDateTime =
+                new Date(`${date}T${startTime}:00`);
+
+            return slotDateTime < now;
+        }
+
+        function renderSlots(slots, date) {
+
+            selectedSlot = null;
+
+            const container =
+                document.getElementById("slotContainer");
+
+            container.innerHTML = "";
+
+            slots.forEach(slot => {
+
+                let className = "available";
+
+                if (slot.available <= 0) {
+                    className = "unavailable";
+                }
+
+                if (isPastSlot(slot.start, date)) {
+                    className = "unavailable";
+                }
+
+                const div = document.createElement("div");
+
+                div.className = `slot ${className}`;
+
+                div.innerText =
+                    `${slot.start} - ${slot.end}`;
+
+                if (className === "available") {
+
+                    div.onclick = () => {
+
+                        document
+                            .querySelectorAll(".slot")
+                            .forEach(item => {
+                                item.classList.remove("selected");
+                            });
+
+                        div.classList.add("selected");
+
+                        selectedSlot = slot.start;
+                    };
+                }
+
+                container.appendChild(div);
+            });
+        }
+
+        async function bookSlot() {
+
+            const customer_name =
+                document.getElementById("customerName").value;
+
+            const customer_phone =
+                document.getElementById("customerPhone").value;
+
+            const service_name =
+                document.getElementById("serviceName").value;
+
+            if (!customer_name) {
+                return alert("Enter Name");
+            }
+
+            if (!customer_phone) {
+                return alert("Enter Phone");
+            }
+
+            if (!selectedSlot) {
+                return alert("Select Slot");
+            }
+
+            try {
+
+                const response = await fetch(
+                    "/api/bookings/book-slot",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+                        body: JSON.stringify({
+                            slug,
+                            customer_name,
+                            customer_phone,
+                            service_name,
+                            booking_date: selectedDate,
+                            slot_start: selectedSlot
+                        })
+                    }
+                );
+
+                const data = await response.json();
+
+                document.getElementById("message")
+                    .innerHTML =
+                    data.message;
+
+                if (data.success) {
+
+                    alert("Booking Confirmed");
+
+                    location.reload();
+                }
+
+            } catch (e) {
+
+                console.error(e);
+
+                alert("Booking Failed");
+            }
+        }
+
+        document
+            .getElementById("todayBtn")
+            .addEventListener("click", renderToday);
+
+        document
+            .getElementById("tomorrowBtn")
+            .addEventListener("click", renderTomorrow);
+
+        loadAvailability();
+
+    </script>
+
+</body>
+
+</html>
