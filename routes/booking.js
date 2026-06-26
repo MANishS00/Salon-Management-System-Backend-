@@ -275,7 +275,7 @@ router.get("/salon/:slug/booking", (req, res) => {
         path.join(
             process.cwd(),
             "public",
-            "booking.html"
+            "book-appointment.html"
         )
     );
 });

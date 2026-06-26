@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book Appointment</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0c0b09;
+      --surface: #161410;
+      --card: #1f1c18;
+      --border: #2e2a24;
+      --gold: #c9a84c;
+      --gold-soft: rgba(201, 168, 76, .12);
+      --gold-mid: rgba(201, 168, 76, .25);
+      --cream: #f5ede0;
+      --muted: #7a7065;
+      --success: #4ade80;
+      --success-bg: rgba(74, 222, 128, .1);
+      --danger: #f87171;
+      --slot-av-bg: rgba(201, 168, 76, .08);
+      --slot-av-border: rgba(201, 168, 76, .4);
+      --slot-sel-bg: rgba(201, 168, 76, .22);
+      --slot-sel-border: #c9a84c;
+      --slot-dis-bg: rgba(255, 255, 255, .03);
+      --slot-dis-border: rgba(255, 255, 255, .07);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      color: var(--cream);
+      padding: 28px 16px 60px;
+    }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .salon-eyebrow {
+      font-size: 11px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    .salon-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(32px, 7vw, 52px);
+      line-height: 1.1;
+      color: var(--cream);
+    }
+
+    .salon-name em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .salon-sub {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 300;
+    }
+
+    .divider {
+      width: 48px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 18px auto 0;
+    }
+
+    /* ── Card ── */
+    .card {
+      max-width: 720px;
+      margin: 0 auto;
+      background: var(--card);
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    /* ── Day Tabs ── */
+    .day-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .day-tab {
+      padding: 18px 10px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid var(--border);
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: color .2s, border-color .2s;
+    }
+
+    .day-tab.active {
+      color: var(--gold);
+      border-color: var(--gold);
+    }
+
+    .day-tab:not(.active):hover {
+      color: var(--cream);
+    }
+
+    /* ── Body ── */
+    .card-body {
+      padding: 28px 28px 32px;
+    }
+
+    @media(max-width:520px) {
+      .card-body {
+        padding: 20px 16px 28px;
+      }
+    }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size: 11px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+
+    /* ── Slot Grid ── */
+    .slot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+
+    @media(max-width:420px) {
+      .slot-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .slot {
+      border-radius: 14px;
+      border: 1.5px solid;
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform .18s, border-color .18s, background .18s;
+      user-select: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slot::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: white;
+      opacity: 0;
+      transition: opacity .15s;
+    }
+
+    .slot:active::after {
+      opacity: .04;
+    }
+
+    .slot.available {
+      background: var(--slot-av-bg);
+      border-color: var(--slot-av-border);
+      color: #e2c97e;
+    }
+
+    .slot.available:hover {
+      transform: translateY(-2px);
+      border-color: var(--gold);
+    }
+
+    .slot.selected {
+      background: var(--slot-sel-bg);
+      border-color: var(--slot-sel-border);
+      color: #f5ede0;
+    }
+
+    .slot.selected .slot-dot {
+      background: var(--gold);
+    }
+
+    .slot.disabled {
+      background: var(--slot-dis-bg);
+      border-color: var(--slot-dis-border);
+      color: #3a3630;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .slot-time {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      line-height: 1;
+    }
+
+    .slot-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 500;
+      opacity: .75;
+    }
+
+    .slot-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+      transition: background .18s;
+    }
+
+    /* ── Form ── */
+    .form-row {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .form-row.two {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    @media(max-width:480px) {
+      .form-row.two {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .field input {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 13px 16px;
+      color: var(--cream);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color .2s, background .2s;
+      width: 100%;
+    }
+
+    .field input::placeholder {
+      color: #46423c;
+    }
+
+    .field input:focus {
+      border-color: var(--gold);
+      background: #1a1712;
+    }
+
+    /* ── Book Button ── */
+    .book-btn {
+      margin-top: 20px;
+      width: 100%;
+      padding: 16px 20px;
+      border: none;
+      border-radius: 14px;
+      background: var(--gold);
+      color: #0c0b09;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: .04em;
+      cursor: pointer;
+      transition: opacity .2s, transform .15s;
+      position: relative;
+    }
+
+    .book-btn:hover {
+      opacity: .9;
+      transform: translateY(-1px);
+    }
+
+    .book-btn:active {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .book-btn:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ── Toast ── */
+    .toast {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .toast.show {
+      display: flex;
+    }
+
+    .toast.success {
+      background: var(--success-bg);
+      border: 1.5px solid rgba(74, 222, 128, .25);
+      color: var(--success);
+    }
+
+    .toast.error {
+      background: rgba(248, 113, 113, .08);
+      border: 1.5px solid rgba(248, 113, 113, .25);
+      color: var(--danger);
+    }
+
+    .toast-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    /* ── Loader ── */
+    .loader {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 160px;
+      color: var(--muted);
+      gap: 12px;
+      font-size: 14px;
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      border-top-color: var(--gold);
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ── Selected slot summary ── */
+    .selection-pill {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      background: var(--gold-mid);
+      border: 1px solid var(--slot-sel-border);
+      border-radius: 24px;
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--gold);
+      margin-bottom: 20px;
+      width: fit-content;
+    }
+
+    .selection-pill.show {
+      display: inline-flex;
+    }
+
+    .selection-pill-x {
+      cursor: pointer;
+      opacity: .6;
+      margin-left: 4px;
+      font-size: 14px;
+    }
+
+    .selection-pill-x:hover {
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="header">
+    <div class="salon-eyebrow">Appointment Booking</div>
+    <h1 class="salon-name" id="salonName"><em>Loading…</em></h1>
+    <p class="salon-sub" id="salonSub">Choose a time that suits you</p>
+    <div class="divider"></div>
+  </header>
+
+  <div class="card">
+    <!-- Day tabs -->
+    <div class="day-tabs">
+      <button class="day-tab active" id="todayTab">Today</button>
+      <button class="day-tab" id="tomorrowTab">Tomorrow</button>
+    </div>
+
+    <div class="card-body">
+      <!-- Slot section -->
+      <div class="section-label">Available Slots</div>
+      <div id="slotContainer">
+        <div class="loader"><span class="spinner"></span> Loading slots…</div>
+      </div>
+
+      <!-- Selected pill -->
+      <div class="selection-pill" id="selectionPill">
+        <span>🗓</span>
+        <span id="pillText"></span>
+        <span class="selection-pill-x" onclick="clearSlot()">✕</span>
+      </div>
+
+      <!-- Form -->
+      <div class="section-label">Your Details</div>
+
+      <div class="form-row two">
+        <div class="field">
+          <label for="customerName">Full Name</label>
+          <input id="customerName" type="text" placeholder="e.g. Rahul Sharma" />
+        </div>
+        <div class="field">
+          <label for="customerPhone">Mobile Number</label>
+          <input id="customerPhone" type="tel" placeholder="10-digit number" maxlength="10" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label for="serviceName">Service <span
+              style="font-weight:300;text-transform:none;letter-spacing:0">(optional)</span></label>
+          <input id="serviceName" type="text" placeholder="e.g. Haircut, Beard Trim, Facial…" />
+        </div>
+      </div>
+
+      <button class="book-btn" id="bookBtn" onclick="bookAppointment()">Confirm Booking</button>
+
+      <div class="toast" id="toast">
+        <span class="toast-icon" id="toastIcon"></span>
+        <span id="toastMsg"></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const pathParts = window.location.pathname.split("/");
+    const salonIdx = pathParts.indexOf("salon");
+    const slug = (salonIdx !== -1 && pathParts[salonIdx + 1]) ? pathParts[salonIdx + 1] : "demo";
+
+    let apiData = null;
+    let selectedSlot = null;
+    let selectedDate = null;
+    let activeDay = "today";
+
+    /* ── Load availability ── */
+    async function loadAvailability() {
+      try {
+        const res = await fetch(`/api/bookings/availability/${slug}`);
+        apiData = await res.json();
+
+        const nameEl = document.getElementById("salonName");
+        nameEl.innerHTML = `<em>${escHtml(apiData.salon_name)}</em>`;
+
+        if (apiData.phone) {
+          document.getElementById("salonSub").textContent =
+            `📞 ${apiData.phone}  ·  Choose a time that suits you`;
+        }
+
+        renderSlots("today");
+      } catch (e) {
+        document.getElementById("slotContainer").innerHTML =
+          `<div class="loader" style="color:#f87171">Failed to load slots. Please refresh.</div>`;
+      }
+    }
+
+    /* ── Format time ── */
+    function formatTime(t) {
+      let h = parseInt(t.split(":")[0]);
+      const ampm = h >= 12 ? "PM" : "AM";
+      const disp = h > 12 ? h - 12 : h === 0 ? 12 : h;
+      return `${disp}:00 ${ampm}`;
+    }
+
+    /* ── Is past? ── */
+    function isPast(start, date) {
+      return new Date(`${date}T${start}:00`) < new Date();
+    }
+
+    /* ── Render slots ── */
+    function renderSlots(day) {
+      activeDay = day;
+      selectedSlot = null;
+      hidePill();
+
+      const info = apiData[day];
+      selectedDate = info.date;
+      const container = document.getElementById("slotContainer");
+      container.innerHTML = "";
+
+      const grid = document.createElement("div");
+      grid.className = "slot-grid";
+
+      info.slots.forEach(slot => {
+        const past = isPast(slot.start, info.date);
+        const full = slot.available <= 0;
+        const disabled = past || full;
+
+        const div = document.createElement("div");
+        div.className = `slot ${disabled ? "disabled" : "available"}`;
+        div.innerHTML = `
+          <div class="slot-time">${formatTime(slot.start)}</div>
+          <div class="slot-badge">
+            <span class="slot-dot"></span>
+            ${disabled ? (past ? "Past" : "Full") : `${slot.available} open`}
+          </div>`;
+
+        if (!disabled) {
+          div.addEventListener("click", () => selectSlot(div, slot.start));
+        }
+
+        grid.appendChild(div);
+      });
+
+      container.appendChild(grid);
+    }
+
+    /* ── Select slot ── */
+    function selectSlot(card, start) {
+      document.querySelectorAll(".slot.available, .slot.selected").forEach(el => {
+        el.classList.remove("selected");
+        el.classList.add("available");
+      });
+      card.classList.remove("available");
+      card.classList.add("selected");
+      selectedSlot = start;
+
+      const day = apiData[activeDay];
+      const label = activeDay === "today" ? "Today" : "Tomorrow";
+      document.getElementById("pillText").textContent =
+        `${label}, ${formatDate(day.date)} · ${formatTime(start)} – ${formatTime(addHour(start))}`;
+      showPill();
+    }
+
+    function clearSlot() {
+      selectedSlot = null;
+      document.querySelectorAll(".slot.selected").forEach(el => {
+        el.classList.remove("selected");
+        el.classList.add("available");
+      });
+      hidePill();
+    }
+
+    function showPill() { document.getElementById("selectionPill").classList.add("show"); }
+    function hidePill() { document.getElementById("selectionPill").classList.remove("show"); }
+
+    function formatDate(d) {
+      return new Date(d).toLocaleDateString("en-IN", { month: "short", day: "numeric" });
+    }
+
+    function addHour(t) {
+      const h = parseInt(t.split(":")[0]) + 1;
+      return `${String(h).padStart(2, "0")}:00`;
+    }
+
+    /* ── Book ── */
+    async function bookAppointment() {
+      const customer_name = document.getElementById("customerName").value.trim();
+      const customer_phone = document.getElementById("customerPhone").value.trim();
+      const service_name = document.getElementById("serviceName").value.trim();
+
+      if (!customer_name) return showToast("error", "Please enter your full name.");
+      if (!/^\d{10}$/.test(customer_phone)) return showToast("error", "Enter a valid 10-digit mobile number.");
+      if (!selectedSlot) return showToast("error", "Please select a time slot first.");
+
+      const btn = document.getElementById("bookBtn");
+      btn.disabled = true;
+      btn.textContent = "Booking…";
+
+      try {
+        const res = await fetch("/api/bookings/book-slot", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            slug,
+            customer_name,
+            customer_phone,
+            service_name,
+            booking_date: selectedDate,
+            slot_start: selectedSlot
+          })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          showToast("success", `Booking confirmed for ${formatTime(selectedSlot)}! See you soon.`);
+          setTimeout(() => location.reload(), 2000);
+        } else {
+          showToast("error", data.message || "Booking failed. Please try again.");
+          btn.disabled = false;
+          btn.textContent = "Confirm Booking";
+        }
+      } catch {
+        showToast("error", "Network error. Please check your connection.");
+        btn.disabled = false;
+        btn.textContent = "Confirm Booking";
+      }
+    }
+
+    /* ── Toast ── */
+    function showToast(type, msg) {
+      const t = document.getElementById("toast");
+      t.className = `toast show ${type}`;
+      document.getElementById("toastIcon").textContent = type === "success" ? "✓" : "✕";
+      document.getElementById("toastMsg").textContent = msg;
+      if (type === "error") setTimeout(() => t.classList.remove("show"), 4000);
+    }
+
+    /* ── Escape HTML ── */
+    function escHtml(s) {
+      return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    /* ── Tab listeners ── */
+    document.getElementById("todayTab").addEventListener("click", () => {
+      document.getElementById("todayTab").classList.add("active");
+      document.getElementById("tomorrowTab").classList.remove("active");
+      renderSlots("today");
+    });
+
+    document.getElementById("tomorrowTab").addEventListener("click", () => {
+      document.getElementById("tomorrowTab").classList.add("active");
+      document.getElementById("todayTab").classList.remove("active");
+      renderSlots("tomorrow");
+    });
+
+    loadAvailability();
+  </script>
+</body>
+
+</html>
