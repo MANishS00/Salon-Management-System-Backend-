@@ -3,6 +3,7 @@ import { supabase } from '../config/supabase.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 import cron from "node-cron";
 import path from 'path';
+import { sendBookingSMS } from "../config/snsService.js";
 
 const router = express.Router();
 
@@ -176,6 +177,20 @@ router.post("/book-slot", async (req, res) => {
 
         if (error) throw error;
 
+        // try {
+        //     await sendBookingSMS({
+        //         phone: customer_phone,
+        //         customerName: customer_name,
+        //         salonName: salon.salon_name,
+        //         bookingDate: booking_date,
+        //         slotStart: slot_start,
+        //         slotEnd: slot_end,
+        //         serviceName: service_name
+        //     });
+        // } catch (err) {
+        //     console.log("SMS Failed");
+        //     console.log(err);
+        // }
         return res.json({
             success: true,
             message: "Booking confirmed",
