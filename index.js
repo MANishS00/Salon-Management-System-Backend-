@@ -9,6 +9,7 @@ import customersRoutes from './routes/customer.js';
 import customerBulkRoutes from './routes/customerBulk.js';
 import customerSmsRoutes from './routes/customerSms.js';
 import qrRoutes from "./routes/qr.js";
+import bookingRoutes from "./routes/booking.js";
 
 
 console.log('SUPABASE_URL =>', process.env.SUPABASE_URL);
@@ -25,6 +26,7 @@ app.use('/api/customers', customersRoutes);
 app.use('/api/customerBulkRoutes', customerBulkRoutes);
 app.use('/api/customerSmsRoutes', customerSmsRoutes);
 app.use("/api/qr", qrRoutes);
+app.use("/api/bookings", bookingRoutes);
 
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {

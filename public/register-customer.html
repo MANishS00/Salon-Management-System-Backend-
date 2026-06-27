@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Salon Registration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Modern Premium Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at 10% 20%, rgb(18, 18, 22) 0%, rgb(28, 28, 38) 90%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #f3f4f6;
+            overflow-x: hidden;
+            position: relative;
+            padding: 20px 0;
+        }
+
+        /* Abstract glowing backdrop shapes */
+        .glow-sphere {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: 1;
+            opacity: 0.25;
+        }
+
+        .sphere-1 {
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, #d4af37, #f3e5ab);
+            top: -50px;
+            left: -50px;
+        }
+
+        .sphere-2 {
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, #8a2be2, #4169e1);
+            bottom: -100px;
+            right: -50px;
+        }
+
+        .card {
+            width: 90%;
+            max-width: 460px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            padding: 35px 30px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            z-index: 10;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #ffffff;
+        }
+
+        .header p {
+            font-size: 0.95rem;
+            color: #8b8d99;
+            font-weight: 400;
+        }
+
+        .salon-highlight {
+            color: #d4af37;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #8b8d99;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        input[type="date"] {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #d4af37;
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 12px rgba(212, 175, 55, 0.15);
+        }
+
+        /* Custom gender radio selector */
+        .gender-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        .gender-option {
+            position: relative;
+        }
+
+        .gender-option input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .gender-label {
+            display: block;
+            text-align: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #a1a1aa;
+            transition: all 0.3s ease;
+        }
+
+        .gender-option input:checked+.gender-label {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: #d4af37;
+            color: #d4af37;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.1);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: linear-gradient(135deg, #d4af37, #c5a880);
+            color: #121216;
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.2);
+            margin-top: 15px;
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(212, 175, 55, 0.35);
+            background: linear-gradient(135deg, #f3e5ab, #d4af37);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        /* Error notification banner */
+        .error-banner {
+            display: none;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Success Overlay Screen */
+        .success-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 10% 20%, rgb(18, 18, 22) 0%, rgb(28, 28, 38) 90%);
+            border-radius: 24px;
+            z-index: 20;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            text-align: center;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px solid #10b981;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #10b981;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.2);
+            animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(0.5);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .success-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .success-desc {
+            font-size: 0.95rem;
+            color: #a1a1aa;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: none;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(18, 18, 22, 0.3);
+            border-radius: 50%;
+            border-top-color: #121216;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="glow-sphere sphere-1"></div>
+    <div class="glow-sphere sphere-2"></div>
+
+    <div class="card" style="position: relative;">
+        <!-- Success Overlay Screen inside the Card -->
+        <div class="success-overlay" id="successOverlay">
+            <div class="success-icon">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                </svg>
+            </div>
+            <h2 class="success-title">Successfully Registered!</h2>
+            <p class="success-desc">Thank you for joining. You have been successfully added to our customer club. We
+                look forward to seeing you soon!</p>
+            <a id="backBtn" href="#" class="btn btn-secondary" style="max-width: 200px; text-decoration: none;">Back to
+                Details</a>
+        </div>
+
+        <div class="header">
+            <h1>Customer Registration</h1>
+            <p>Join the <span id="salonLabel" class="salon-highlight">Salon</span> Customer Club</p>
+        </div>
+
+        <!-- Error banner -->
+        <div id="errorBanner" class="error-banner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <span id="errorText">An error occurred</span>
+        </div>
+
+        <form id="registrationForm">
+            <!-- Names Row -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstName">First Name *</label>
+                    <input type="text" id="firstName" name="first_name" placeholder="John" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <input type="text" id="lastName" name="last_name" placeholder="Doe">
+                </div>
+            </div>
+
+            <!-- Mobile -->
+            <div class="form-group">
+                <label for="mobileNo">Mobile Number *</label>
+                <input type="tel" id="mobileNo" name="mobile_no" placeholder="Enter 10-digit mobile" pattern="[0-9]{10}"
+                    title="Please enter a valid 10-digit mobile number" required>
+            </div>
+
+            <!-- Gender -->
+            <div class="form-group">
+                <label>Gender</label>
+                <div class="gender-selector">
+                    <div class="gender-option">
+                        <input type="radio" id="genderMale" name="gender" value="Male" checked>
+                        <label for="genderMale" class="gender-label">Male</label>
+                    </div>
+                    <div class="gender-option">
+                        <input type="radio" id="genderFemale" name="gender" value="Female">
+                        <label for="genderFemale" class="gender-label">Female</label>
+                    </div>
+                    <div class="gender-option">
+                        <input type="radio" id="genderOther" name="gender" value="Other">
+                        <label for="genderOther" class="gender-label">Other</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Date of Birth -->
+            <div class="form-group">
+                <label for="dob">Date of Birth</label>
+                <input type="date" id="dob" name="date_of_birth">
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">
+                <span id="btnText">Submit Details</span>
+                <div class="spinner" id="btnSpinner"></div>
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // Extract slug from URL. URL is formatted as /api/qr/salon/:slug/register
+        const pathParts = window.location.pathname.split("/");
+        const slug = pathParts[pathParts.length - 2];
+
+        // Setup the back button link
+        document.getElementById("backBtn").href = `/api/qr/salon/${slug}`;
+
+        // Fetch Salon details to display name
+        fetch(`/api/qr/public-salon/${slug}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.salon_name) {
+                    document.getElementById("salonLabel").innerText = data.salon_name;
+                }
+            })
+            .catch(err => console.error("Could not fetch salon name", err));
+
+        // Form submission handling
+        const form = document.getElementById("registrationForm");
+        const submitBtn = document.getElementById("submitBtn");
+        const btnText = document.getElementById("btnText");
+        const btnSpinner = document.getElementById("btnSpinner");
+        const errorBanner = document.getElementById("errorBanner");
+        const errorText = document.getElementById("errorText");
+        const successOverlay = document.getElementById("successOverlay");
+
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            // Clear errors
+            errorBanner.style.display = "none";
+
+            // Show loading
+            btnText.style.display = "none";
+            btnSpinner.style.display = "block";
+            submitBtn.disabled = true;
+
+            const formData = new FormData(form);
+            const body = {
+                first_name: formData.get("first_name").trim(),
+                last_name: formData.get("last_name").trim() || null,
+                mobile_no: formData.get("mobile_no").trim(),
+                gender: formData.get("gender"),
+                date_of_birth: formData.get("date_of_birth") || null
+            };
+
+            fetch(`/api/qr/salon/${slug}/add-customer`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(body)
+            })
+                .then(async res => {
+                    const data = await res.json();
+                    if (!res.ok) {
+                        throw new Error(data.message || "Failed to submit customer details");
+                    }
+                    return data;
+                })
+                .then(data => {
+                    // Successful registration
+                    successOverlay.style.display = "flex";
+                })
+                .catch(err => {
+                    // Show error message
+                    errorText.innerText = err.message;
+                    errorBanner.style.display = "flex";
+
+                    // Reset submit button
+                    btnText.style.display = "block";
+                    btnSpinner.style.display = "none";
+                    submitBtn.disabled = false;
+                });
+        });
+    </script>
+</body>
+
+</html>
